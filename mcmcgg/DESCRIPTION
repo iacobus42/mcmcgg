@@ -1,0 +1,10 @@
+Package: mcmcgg
+Type: Package
+Title: Simple ggplot2 visualizations of mcmc output
+Version: 1.0
+Date: 2013-12-16
+Author: Jacob Simmering, Jessica Orth
+Maintainer: Jacob Simmering <jacob@jacobsimmering.com>
+Description: Simple ggplot2 visualizations of mcmc output, specifically of coda data format files from OpenBUGS/WinBUGS
+Depends: ggplot2, coda
+License: GPL

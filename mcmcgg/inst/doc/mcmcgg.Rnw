@@ -1,0 +1,100 @@
+\documentclass{article}
+\usepackage[left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm]{geometry}
+
+% \VignetteIndexEntry{Using the \texttt{mcmcgg} Package}
+
+\title{Using the \texttt{mcmcgg} Package}
+\author{Jacob Simmering}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\maketitle
+
+<<echo=false,results=hide>>=
+library(ggplot2)
+library(mcmcgg)
+@ 
+
+\section{Introduction}
+The \texttt{mcmcgg} package includes a set of simple functions for the 
+visualization of output from MCMC chains, specifically those made using 
+OpenBUGS/WinBUGS and imported into R with \texttt{coda}. The main feature is
+that \texttt{mcmcgg} provides \texttt{ggplot2} graphics over the relatively
+poor visualizations provided by OpenBUGS/WinBUGS. Additionally, the control 
+over some of the visualizations, specificially with \texttt{bgr.gg()}, provides
+much greater control over the resulting graph quality. 
+
+\section{A Worked Example}
+Using OpenBUGS's pump data example (OpenBUGS Examples Vol 1), use OpenBUGS 
+to create the model as defined in the documentation and set two chains using 
+the provided inits. I ran for 1000 iterations but you may choose any number. 
+
+\subsection{OpenBUGS}
+After running the MCMC for your desired number of iterations while monitoring 
+the parameters of interest, open the sample window and click the button labeled
+``coda''. This will bring up a set of windows, one per chain and an index. Save
+each window using the File menu. Note that OpenBUGS defaults to ODC and you 
+will want to change that to txt using the dropdown. I suggest the creative names
+of \texttt{chain1.txt}, \texttt{chain2.txt} and \texttt{index.txt}. 
+
+\subsection{Importing into R}
+Its fairly easy to get the resulting data into R using the \texttt{read.coda} 
+function in the \texttt{coda} package. Specifically, you will want a command 
+of the form
+
+\begin{verbatim}
+chain1 <- read.coda("path/to/chain1.txt", "path/to/index.txt")
+\end{verbatim}
+
+\noindent and a similar command for chains 2, 3, $\ldots$ 
+
+This results in a CODA object. These objects are similar to a matrix with 
+columns matching to parameters and rows matching to iteration number. You will
+have one CODA object per chain. 
+
+\subsection{Using \texttt{mcmcgg}}
+The three major functions of \texttt{mcmcgg} are \texttt{bgr.gg()}, 
+\texttt{history.gg()} and \texttt{acf.gg()}. The uses should be clear from the
+names of each function. Each function expects an argument \texttt{x} that is
+a vector of the chains for the parameter value of interest. This vector can be
+easily formed using 
+
+\begin{verbatim}
+x <- c(abstractParam(indexOfDesiredParam, codaObject1), abstractParam(indexOfDesiredParam, codaObjectN))
+\end{verbatim}
+
+\noindent The resulting vector can be usred directly with the \texttt{mcmcgg}
+functions to produce the plots. The other functions all take as arguments 
+\begin{itemize}
+\item \texttt{iter}: the number of iterations per chain
+\item \texttt{nchain}: the number of chains in \texttt{x}
+\item \texttt{T}: the twice the iteration numbers at which to consider splitting
+the burn-in and inference samples (\texttt{bgr.gg} ONLY)
+\end{itemize}
+
+\section{Other Notes}
+It is possible to combine these functions with functions like \texttt{lapply()}
+or a \texttt{for} loop when making graphs for many parameters. It is fairly 
+trivial to do this and may be a future direction for this package but 
+currently, it is required that the user do this by ``hand''.
+
+% A graph of these results is in Figure~\ref{fig:pareto}.
+% 
+% \begin{figure}
+%   \centering
+% <<fig=TRUE,width=8,echo=false>>=
+% x <- seq(0, 20, 0.001)
+% example <- data.frame(x = rep(x, 2),
+%                       y = c(dpareto(x, 1, 1), ppareto(x, 1, 1)),
+%                       fun = factor(c(rep("dpareto", length(x)), 
+%                                      rep("ppareto", length(x)))))
+% ggplot(example) + geom_line(aes(x = x, y = y, color = fun)) + 
+%   scale_x_continuous("X") + scale_y_continuous("Density") + 
+%   theme_bw()
+% @  
+%   \caption{Plots of the Pareto(1, 1) density and cumulative density functions.}
+%   \label{fig:pareto}
+% \end{figure}
+\end{document}
+
+
